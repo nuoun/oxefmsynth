@@ -202,7 +202,8 @@ void GetResourcesPath(char *path, int size)
     strncpy(path, info.dli_fname, PATH_MAX);
     char* tmp = strrchr(path, '/');
     *tmp = 0;
-    strcat(path, "/" BMP_PATH "/");
+    // VST3 bundle: .so is in Contents/x86_64-linux/; bitmaps are in Contents/Resources/
+    strcat(path, "/../Resources");
 }
 
 CXlibToolkit::CXlibToolkit(void *parentWindow, CEditor *editor)
@@ -459,6 +460,8 @@ Pixmap CXlibToolkit::LoadImageFromFile(const char *path, XVisualInfo *v)
 
 Pixmap CXlibToolkit::LoadImageFromBuffer(const char *buffer, XVisualInfo *v)
 {
+    if (!buffer)
+        return 0;
     BITMAPHEADER *header = (BITMAPHEADER *)buffer;
     if (header->fh.signature[0] != 'B' || header->fh.signature[1] != 'M')
     {

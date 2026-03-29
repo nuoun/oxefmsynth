@@ -136,18 +136,17 @@ elseif(UNIX)
     target_link_libraries(oxefmsynth PRIVATE X11 pthread dl)
     target_compile_options(oxefmsynth PRIVATE -fPIC -D__cdecl=)
 
-    # Embed skin bitmaps into the binary on Linux (matches old Makefile.vstlinux behaviour)
-    find_program(EMBEDRESOURCES embedresources PATHS "${CMAKE_CURRENT_SOURCE_DIR}/src")
-    if(EMBEDRESOURCES)
-        add_custom_command(
-            OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/bitmaps.cpp"
-            COMMAND ${EMBEDRESOURCES}
-                    "${CMAKE_CURRENT_SOURCE_DIR}/skins/default"
-                    "${CMAKE_CURRENT_BINARY_DIR}/bitmaps.cpp"
-            COMMENT "Embedding skin bitmaps"
-        )
-        target_sources(oxefmsynth PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/bitmaps.cpp")
-    endif()
+    # Build the embedresources host tool from source, then run it to generate bitmaps.cpp.
+    # The tool expects one argument (output path) and reads skins/default/ relative to CWD.
+    add_executable(embedresources "${CMAKE_CURRENT_SOURCE_DIR}/src/toolkits/embedresources.cpp")
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/bitmaps.cpp"
+        COMMAND embedresources "${CMAKE_CURRENT_BINARY_DIR}/bitmaps.cpp"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        DEPENDS embedresources
+        COMMENT "Embedding skin bitmaps"
+    )
+    target_sources(oxefmsynth PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/bitmaps.cpp")
 endif()
 
 smtg_target_add_plugin_resources(oxefmsynth
