@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Oxe FM Synth: a software synthesizer
 Copyright (C) 2004-2015  Daniel Moura <oxe@oxesoft.com>

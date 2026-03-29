@@ -1,5 +1,3 @@
-#pragma once
-
 /*
 Oxe FM Synth: a software synthesizer
 Copyright (C) 2004-2015  Daniel Moura <oxe@oxesoft.com>
@@ -18,18 +16,24 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#ifndef __OXEDMO__
+#pragma once
 
-class CHostInterface
+#include "hostinterface.h"
+
+namespace Steinberg {
+namespace Vst {
+class OxeVst3;
+} // namespace Vst
+} // namespace Steinberg
+
+class CVstHostInterface3 : public CHostInterface
 {
 public:
-    virtual void ReceiveMessageFromPlugin(unsigned int messageID, unsigned int par1, unsigned int par2) {}
-};
+    CVstHostInterface3(Steinberg::Vst::OxeVst3* effect);
+    void ReceiveMessageFromPlugin(unsigned int messageID,
+                                  unsigned int par1,
+                                  unsigned int par2) override;
 
-enum {
-    UPDATE_DISPLAY,
-    SET_PROGRAM   ,
-    SET_PARAMETER
+private:
+    Steinberg::Vst::OxeVst3* effectx;
 };
-
-#endif

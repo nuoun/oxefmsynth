@@ -10,3 +10,22 @@ oxefmsynth
 oxefmsynth.app
 oxefmsynth.vst
 .DS_Store
+
+# Visual Studio
+obj/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+.vs/
+packages/
+target/
+*.pdb
+packages.config
+CMakeSettings.json
+.vscode
+.cache
+
+# CMake
+build/
+out/

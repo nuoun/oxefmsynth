@@ -26,7 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <stdio.h>
 
 static int g_useCount = 0;
-extern void* hInstance;
+// VST3 dllmain.cpp exports moduleHandle (void*) instead of the VST2 hInstance.
+extern void* moduleHandle;
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -153,7 +154,8 @@ void GetResourcesPath(char *path, int size)
             break;
         }
     }
-    StringCchCatA(path, MAX_PATH, "\\"BMP_PATH);
+    // VST3 bundle: DLL lives in Contents/x86_64-win/; bitmaps are in Contents/Resources/
+    StringCchCatA(path, MAX_PATH, "..\\Resources");
 }
 
 CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
@@ -169,8 +171,8 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
         windowClass.lpfnWndProc   = WindowProc;
         windowClass.cbClsExtra    = 0;
         windowClass.cbWndExtra    = 0;
-        windowClass.hInstance     = (HINSTANCE)hInstance;
-        windowClass.hIcon         = LoadIcon((HINSTANCE)hInstance,MAKEINTRESOURCE(IDI_ICON));
+        windowClass.hInstance     = (HINSTANCE)moduleHandle;
+        windowClass.hIcon         = LoadIcon((HINSTANCE)moduleHandle,MAKEINTRESOURCE(IDI_ICON));
         windowClass.hCursor       = LoadCursor( NULL, IDC_ARROW );
         windowClass.hbrBackground = NULL;
         windowClass.lpszMenuName  = 0;
@@ -201,7 +203,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
             rect.bottom,
             0,
             0,
-            (HINSTANCE)hInstance,
+            (HINSTANCE)moduleHandle,
             NULL
         );
     }
@@ -219,7 +221,7 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
             GUI_HEIGHT,
             (HWND)parentWindow,
             NULL,
-            (HINSTANCE)hInstance,
+            (HINSTANCE)moduleHandle,
             NULL
         );
     }
@@ -252,14 +254,14 @@ CWindowsToolkit::CWindowsToolkit(void *parentWindow, CEditor *editor)
     StringCchPrintf(fullPath, MAX_PATH, "%s\\%s", path, "ops.bmp");
     bmps[BMP_OPS]     = (HBITMAP)LoadImageA(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-    if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_CHARS));
-    if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB));
-    if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB2));
-    if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_KNOB3));
-    if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_CHAVE));
-    if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_FUNDO));
-    if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_BUTTONS));
-    if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadBitmap((HINSTANCE)hInstance,MAKEINTRESOURCE(IDB_OPS));
+    if (!bmps[BMP_CHARS  ]) bmps[BMP_CHARS  ] = LoadBitmap((HINSTANCE)moduleHandle,MAKEINTRESOURCE(IDB_CHARS));
+    if (!bmps[BMP_KNOB   ]) bmps[BMP_KNOB   ] = LoadBitmap((HINSTANCE)moduleHandle,MAKEINTRESOURCE(IDB_KNOB));
+    if (!bmps[BMP_KNOB2  ]) bmps[BMP_KNOB2  ] = LoadBitmap((HINSTANCE)moduleHandle,MAKEINTRESOURCE(IDB_KNOB2));
+    if (!bmps[BMP_KNOB3  ]) bmps[BMP_KNOB3  ] = LoadBitmap((HINSTANCE)moduleHandle,MAKEINTRESOURCE(IDB_KNOB3));
+    if (!bmps[BMP_KEY    ]) bmps[BMP_KEY    ] = LoadBitmap((HINSTANCE)moduleHandle,MAKEINTRESOURCE(IDB_CHAVE));
+    if (!bmps[BMP_BG     ]) bmps[BMP_BG     ] = LoadBitmap((HINSTANCE)moduleHandle,MAKEINTRESOURCE(IDB_FUNDO));
+    if (!bmps[BMP_BUTTONS]) bmps[BMP_BUTTONS] = LoadBitmap((HINSTANCE)moduleHandle,MAKEINTRESOURCE(IDB_BUTTONS));
+    if (!bmps[BMP_OPS    ]) bmps[BMP_OPS    ] = LoadBitmap((HINSTANCE)moduleHandle,MAKEINTRESOURCE(IDB_OPS));
     // create offscreen buffer
     hdc = GetDC(hWnd);
     hdcMem = CreateCompatibleDC(hdc);
@@ -275,7 +277,7 @@ CWindowsToolkit::~CWindowsToolkit()
     g_useCount--;
     if (g_useCount == 0)
     {
-        UnregisterClassW(L"OxeVstEditorClass", (HINSTANCE)hInstance);
+        UnregisterClassW(L"OxeVstEditorClass", (HINSTANCE)moduleHandle);
     }
     DeleteDC(hdcAux);
     DeleteDC(hdcMem);

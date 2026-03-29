@@ -706,7 +706,8 @@ void CPrograms::GetProgName(char* str, int numpg)
 void CPrograms::SetProgName(char* str, int numpg)
 {
     memset(currentbank->prg[numpg].PNAME, 0, PG_NAME_SIZE);
-    memcpy(currentbank->prg[numpg].PNAME, str, min(strlen(str), PG_NAME_SIZE));
+    size_t slen = strlen(str);
+    memcpy(currentbank->prg[numpg].PNAME, str, slen < PG_NAME_SIZE ? slen : PG_NAME_SIZE);
     haschanges = true;
     if (hostinterface)
     {

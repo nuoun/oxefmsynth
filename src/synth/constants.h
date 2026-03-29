@@ -1,3 +1,5 @@
+#pragma once
+
 /*
 Oxe FM Synth: a software synthesizer
 Copyright (C) 2004-2015  Daniel Moura <oxe@oxesoft.com>
@@ -110,6 +112,11 @@ __inline long int lrintf (float flt)
 // ------------------------------------------------------------------
 // general purpose constants
 // ------------------------------------------------------------------
+// RELEASE may be injected as a numeric macro by build systems (e.g. -DRELEASE=1).
+// Undefine it here so the enum member below is not corrupted.
+#ifdef RELEASE
+#undef RELEASE
+#endif
 enum
 {
     INACTIVE,
@@ -147,9 +154,6 @@ enum
     SINGLESAMPLEMODE
 };
 
-#ifndef min
-#define min(X, Y) (((X) < (Y)) ? (X) : (Y))
-#endif
 
 #ifndef NULL
 #define NULL 0
